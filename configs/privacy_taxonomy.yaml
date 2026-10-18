@@ -1,0 +1,150 @@
+# Privacy taxonomy: what counts as privacy-related information, and what the anonymizer does with it.
+#
+# This file is both documentation (for the report) and configuration (read by clinanon.taxonomy).
+# The organizers asked for "common sense + literature", so every category cites its sources:
+#   HIPAA - 45 CFR 164.514(b)(2), Safe Harbor: the 18 identifiers
+#   I2B2  - 2014 i2b2/UTHealth de-identification guidelines: a risk-averse superset of HIPAA that also
+#           annotates professions, hospitals and all date parts (including years)
+#   GDPR  - Art. 4(1) (indirect identification via combinations of attributes), Art. 9 (special categories)
+#   TAB   - Text Anonymization Benchmark (Pilan et al., 2022): DIRECT vs QUASI identifiers
+#   STANFORD - Chambon et al., 2023, Stanford/AIMI clinical de-identifier label set (incl. VENDOR)
+#
+# Privacy is scored by running a PII detector over the output. Detectors do not flag bracketed tags such
+# as "[DATE]", but they do flag generalized values such as "1958" or "in his 50s", so every category
+# replaces the span with a tag instead of a generalized value.
+#
+# action: tag  -> replace the span with `tag`
+#         keep -> leave the span as is (still logged in decisions.jsonl)
+
+version: 2
+
+categories:
+  NAME:
+    label: a person's name
+    identifier: direct
+    sources: [HIPAA, I2B2, TAB]
+    description: Name of any person - patient, clinician, relative, friend - including first-name-only
+      vocatives ("hi , andrew") and titles ("mr . james", "dr. reyes").
+    action: tag
+    tag: "[PERSON]"
+    role_tags:                  # used when the role of the person can be inferred
+      patient: "[PATIENT]"
+      clinician: "[DOCTOR]"
+
+  AGE:
+    label: an age
+    identifier: quasi
+    sources: [I2B2, GDPR]       # HIPAA only requires ages > 89; I2B2 annotates every age
+    description: Age of a person ("59-year-old", "aged 59", "he is 59"), including relatives' ages.
+    action: tag
+    tag: "[AGE]"
+
+  DATE:
+    label: a calendar date
+    identifier: quasi
+    sources: [HIPAA, I2B2]
+    description: Every calendar element - full dates, day+month ("on 04/10", "the 24th"), month names
+      ("november and december", "since march"), years ("in 2019", "twenty eighteen"), weekdays
+      ("saturday night"), holidays ("christmas") and seasons ("this summer").
+    action: tag
+    tag: "[DATE]"
+
+  TIME_ANCHOR:
+    label: a relative time expression
+    identifier: quasi-weak
+    sources: [HIPAA]            # not a date element: only meaningful relative to the unknown visit date
+    description: Visit-relative anchors ("today", "yesterday", "tonight", "last night", "this morning").
+      Kept, because they carry symptom timing and do not identify a date.
+    action: keep
+    why_kept: relative time carries symptom timing and does not identify a date
+    tag: "[DATE]"
+
+  TIME:
+    label: a clock time
+    identifier: quasi
+    sources: [I2B2]
+    description: Clock times ("by 7:00", "2:00 am", "seven o'clock last night"). Clock-face positions in
+      an exam ("a mass at the two o'clock position") are anatomy and are kept.
+    action: tag
+    tag: "[TIME]"
+
+  LOCATION:
+    label: a place
+    identifier: quasi
+    sources: [HIPAA, I2B2]
+    description: Street address ("down on fifth street", "Bahnhofstrasse 12", "rue Boichat 78"), city,
+      county, state, canton, country, postcode ("8001 Zürich", "LS7 6FH", "MA 02134"), mountains and other
+      named places ("mount baker"). Cities, regions and countries come from GeoNames and are only matched
+      after a word that introduces a place ("lives in", "moved from", "a trip to").
+    action: tag
+    tag: "[LOCATION]"
+
+  ORGANIZATION:
+    label: a named organization
+    identifier: quasi
+    sources: [I2B2, TAB]
+    description: Named employers and insurers ("works for White LLC", "Insurance - CSS"), schools, sports
+      teams, companies, and named hospitals and facilities ("East Metropolitan Hospital", "the rex
+      center", "Kantonsspital Aarau", "Ospedale Regionale di Lugano"), including short forms of a facility
+      named elsewhere in the encounter ("east metro").
+    action: tag
+    tag: "[ORGANIZATION]"
+
+  CONTACT:
+    label: contact information
+    identifier: direct
+    sources: [HIPAA, I2B2]
+    description: Phone and fax numbers (international, national and US formats, and spoken digit by
+      digit), e-mail addresses (also spoken - "anna dot keller at gmail dot com"), URLs, IP addresses.
+    action: tag
+    tag: "[CONTACT]"
+
+  IDENTIFIER:
+    label: an identifying number
+    identifier: direct
+    sources: [HIPAA, I2B2]
+    description: Medical record numbers, SSN, AHV, health-plan/insurance numbers, account, license, vehicle
+      and device numbers, including identifiers spelled digit by digit ("mrn 3-8-4-9-2-0") and unlabeled
+      numbers too long to be a measurement ("8075611338185", "FW6410349").
+    action: tag
+    tag: "[ID]"
+
+  PROFESSION:
+    label: an occupation
+    identifier: quasi
+    sources: [I2B2]
+    description: Occupation of the patient or relatives ("employed as an x-ray technician", "owns an
+      auto repair shop", "works part time as a tram driver"). Kept when it is part of a diagnosis (an ICD-10-CM eponym such as "farmer's
+      lung", or a word of the encounter's own ICD-10 descriptions).
+    action: tag
+    tag: "[PROFESSION]"
+
+  VENDOR:
+    label: a vendor or software name
+    identifier: quasi
+    sources: [STANFORD]         # the Stanford/AIMI de-identification scheme has a VENDOR category
+    description: Names of the software or vendor used in the care setting, notably the ambient
+      documentation assistants addressed by name ("hey dragon", "i'd like to tell dax about you") and
+      the patient portal ("send me a mychart message"; "my chart" in two words is the doctor's chart).
+    action: tag
+    tag: "[VENDOR]"
+
+  DEMOGRAPHIC:
+    label: a nationality, ethnicity or religion
+    identifier: quasi
+    sources: [GDPR]             # Art. 9 special categories
+    description: Nationality, ethnicity, religion, political affiliation.
+    action: tag
+    tag: "[DEMOGRAPHIC]"
+
+# Information that is NOT privacy-related for this task and is always kept verbatim.
+# The clinical veto (clinanon.veto) protects these from false-positive detections.
+kept:
+  - Diagnoses, symptoms and findings, including eponyms ("Parkinson's disease", "positive Spurling's")
+  - Drug names (brand and generic), doses, frequencies ("daily", "twice a day")
+  - Durations and clinical time ("for two weeks", "3 months ago", "capillary refill less than 3 seconds")
+  - Laterality, severity, negation and uncertainty
+  - Labs, vitals and measurements; anatomical locations, including vertebral levels ("C5-C6", "L5")
+  - Activity, injury mechanism and type of place (ICD-10 external-cause codes need them)
+  - Sex/gender (clinically relevant)
+  - Speaker tags ([doctor], [patient]) and note section headers

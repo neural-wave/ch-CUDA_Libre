@@ -1,0 +1,185 @@
+# Occupations (hand-curated from common US BLS SOC job titles), lower case, singular.
+# Matched only after "i'm a", "she is a", "works as a", "employed as", "retired" ..., so care-team roles
+# ("my cardiologist", "the nurse") are never touched. Ambiguous words are listed only in multi-word form
+# ("mail carrier", not "carrier": a genetic carrier is clinical).
+# Healthcare
+nurse
+nurse practitioner
+registered nurse
+physician
+physician assistant
+doctor
+surgeon
+dentist
+dental hygienist
+pharmacist
+pharmacy technician
+paramedic
+emt
+medical assistant
+nursing assistant
+caregiver
+home health aide
+physical therapist
+occupational therapist
+respiratory therapist
+radiology technician
+x-ray technician
+lab technician
+phlebotomist
+veterinarian
+vet tech
+massage therapist
+psychologist
+therapist
+counselor
+social worker
+# Education and science
+teacher
+substitute teacher
+professor
+lecturer
+tutor
+librarian
+principal
+researcher
+scientist
+engineer
+software engineer
+software developer
+programmer
+data analyst
+chemist
+# Office, business and law
+accountant
+bookkeeper
+lawyer
+attorney
+paralegal
+secretary
+receptionist
+office manager
+manager
+store manager
+administrator
+consultant
+banker
+bank teller
+cashier
+insurance agent
+real estate agent
+realtor
+financial advisor
+analyst
+salesman
+saleswoman
+sales representative
+marketing manager
+project manager
+business owner
+entrepreneur
+ceo
+executive
+# Trades, construction and manufacturing
+carpenter
+electrician
+plumber
+welder
+mechanic
+auto mechanic
+machinist
+roofer
+painter
+mason
+bricklayer
+construction worker
+contractor
+general contractor
+landscaper
+gardener
+factory worker
+assembly line worker
+technician
+maintenance worker
+janitor
+custodian
+housekeeper
+cleaner
+# Transport and logistics
+truck driver
+bus driver
+taxi driver
+delivery driver
+uber driver
+pilot
+flight attendant
+mail carrier
+mailman
+postal worker
+warehouse worker
+forklift operator
+# Food, retail and service
+chef
+cook
+line cook
+baker
+butcher
+waiter
+waitress
+server
+bartender
+barista
+hairdresser
+hair stylist
+barber
+cosmetologist
+nanny
+babysitter
+daycare worker
+retail worker
+# Public service and security
+police officer
+cop
+firefighter
+fireman
+security guard
+soldier
+marine
+sailor
+correctional officer
+mail clerk
+# Agriculture and outdoors
+farmer
+rancher
+fisherman
+lumberjack
+logger
+miner
+coal miner
+# Arts, media and sport
+artist
+musician
+singer
+actor
+actress
+writer
+author
+journalist
+photographer
+graphic designer
+designer
+architect
+dancer
+coach
+personal trainer
+athlete
+# Other
+student
+college student
+graduate student
+pastor
+priest
+minister
+homemaker
+stay-at-home mom
+stay-at-home dad
